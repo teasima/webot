@@ -16,11 +16,11 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 var bot = new builder.UniversalBot(connector);
 bot.localePath(path.join(__dirname, './locale'));
 
-var recognizer = new builder.LuisRecognizer("https://westcentralus.api.cognitive.microsoft.com/luis/v2.0/apps/38fa8e1b-4495-4187-accc-9301800ffd18?subscription-key=a6d991277dd340939ea81a3da5503f57&timezoneOffset=0&verbose=true&q="); 
-bot.recognizer(recognizer); 
+//var recognizer = new builder.LuisRecognizer("https://westcentralus.api.cognitive.microsoft.com/luis/v2.0/apps/38fa8e1b-4495-4187-accc-9301800ffd18?subscription-key=a6d991277dd340939ea81a3da5503f57&timezoneOffset=0&verbose=true&q="); 
+//bot.recognizer(recognizer); 
 
 
-bot.dialog('/', function (session, args, next) {
+bot.dialog('/', function (session ){ //, args, next) {
          //var airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, '定时提醒'); 
            //if (airportEntity) { 
              // airport entity detected, continue to next step 
