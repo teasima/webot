@@ -1,53 +1,68 @@
-"use strict";
-var builder = require("botbuilder");
-var botbuilder_azure = require("botbuilder-azure");
-var path = require('path');
+// This loads the environment variables from the .env file
+require('dotenv-extended').load();
 
-var useEmulator = (process.env.NODE_ENV == 'development');
+var builder = require('botbuilder');
+var restify = require('restify');
 
-var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
-    appId: process.env['MicrosoftAppId'],
-    appPassword: process.env['MicrosoftAppPassword'],
-    stateEndpoint: process.env['BotStateEndpoint'],
-    openIdMetadata: process.env['BotOpenIdMetadata']
-    
+// Setup Restify Server
+var server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3978, function () {
+    console.log('%s listening to %s', server.name, server.url);
 });
 
-var bot = new builder.UniversalBot(connector);
-bot.localePath(path.join(__dirname, './locale'));
-
-//var recognizer = new builder.LuisRecognizer("https://westcentralus.api.cognitive.microsoft.com/luis/v2.0/apps/38fa8e1b-4495-4187-accc-9301800ffd18?subscription-key=a6d991277dd340939ea81a3da5503f57&timezoneOffset=0&verbose=true&q="); 
-//bot.recognizer(recognizer); 
-
-
-bot.dialog('/', function (session ){ //, args, next) {
-         //var airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, '定时提醒'); 
-           //if (airportEntity) { 
-             // airport entity detected, continue to next step 
-           //  session.dialogData.searchType = 'airport'; 
-         //    next({ response: airportEntity.entity }); 
-       //  } else {
-             // no entities detected, ask user for a destination 
-     //        builder.Prompts.text(session, 'Please enter  what you want to do'); 
-   //      } 
-
-    session.send('You said ' + session.message.text);
+// Create connector and listen for messages
+var connector = new builder.ChatConnector({
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
-//.triggerAction({ 
-//     matches: '定时提醒', 
-//     onInterrupted: function (session) { 
-//        session.send('Please provide a destination'); 
-//     } 
-// }); 
+server.post('/api/messages', connector.listen());
+
+var instructions = 'Welcome to the Bot to showcase the DirectLine API. Send \'Show me a hero card\' or \'Send me a BotFramework image\' to see how the DirectLine client supports custom channel data. Any other message will be echoed.';
+
+var bot = new builder.UniversalBot(connector, function (session) {
+
+    var reply = new builder.Message()
+        .address(session.message.address);
+
+    var text = session.message.text.toLocaleLowerCase();
+    switch (text) {
+        case 'show me a hero card':
+            reply.text('Sample message with a HeroCard attachment')
+                .addAttachment(new builder.HeroCard(session)
+                    .title('Sample Hero Card')
+                    .text('Displayed in the DirectLine client'));
+            break;
+
+        case 'send me a botframework image':
+            reply.text('Sample message with an Image attachment')
+                .addAttachment({
+                    contentUrl: 'https://docs.microsoft.com/en-us/bot-framework/media/how-it-works/architecture-resize.png',
+                    contentType: 'image/png',
+                    name: 'BotFrameworkOverview.png'
+                });
+
+            break;
+
+        default:
+            reply.text('You said \'' + session.message.text + '\'');
+            break;
+    }
+
+    session.send(reply);
+
+});
 
 
-if (useEmulator) {
-    var restify = require('restify');
-    var server = restify.createServer();
-    server.listen(3978, function() {
-        console.log('test bot endpont at http://localhost:3978/api/messages');
-    });
-    server.post('/api/messages', connector.listen());    
-} else {
-    module.exports = { default: connector.listen() }
-}
+bot.on('conversationUpdate', function (activity) {
+    // when user joins conversation, send instructions
+    if (activity.membersAdded) {
+        activity.membersAdded.forEach(function (identity) {
+            if (identity.id === activity.address.bot.id) {
+                var reply = new builder.Message()
+                    .address(activity.address)
+                    .text(instructions);
+                bot.send(reply);
+            }
+        });
+    }
+});
