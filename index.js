@@ -21,23 +21,24 @@ bot.recognizer(recognizer);
 
 
 bot.dialog('/', function (session, args, next) {
-         var airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, '定时提醒'); 
-           if (airportEntity) { 
+         //var airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, '定时提醒'); 
+           //if (airportEntity) { 
              // airport entity detected, continue to next step 
-             session.dialogData.searchType = 'airport'; 
-             next({ response: airportEntity.entity }); 
-         } else {
+           //  session.dialogData.searchType = 'airport'; 
+         //    next({ response: airportEntity.entity }); 
+       //  } else {
              // no entities detected, ask user for a destination 
-             builder.Prompts.text(session, 'Please enter  what you want to do'); 
-         } 
+     //        builder.Prompts.text(session, 'Please enter  what you want to do'); 
+   //      } 
 
     session.send('You said ' + session.message.text);
-}).triggerAction({ 
-     matches: '定时提醒', 
-     onInterrupted: function (session) { 
-         session.send('Please provide a destination'); 
-     } 
- }); 
+});
+//.triggerAction({ 
+//     matches: '定时提醒', 
+//     onInterrupted: function (session) { 
+//        session.send('Please provide a destination'); 
+//     } 
+// }); 
 
 
 if (useEmulator) {
