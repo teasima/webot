@@ -25,7 +25,10 @@ import sample.integration.httpandtransformer.OAMessage;
 @Component
 public class Config2 {
 	
-	 
+	@Bean
+	public DirectChannel replyToInboundGateway(){
+		return new DirectChannel();
+	} 
 
 	@Bean
 	public DirectChannel httpRequest3(){

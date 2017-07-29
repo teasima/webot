@@ -39,9 +39,9 @@ public class Config {
 	}
 
 	@Bean
-	public IntegrationFlow inbound2() {
-		return IntegrationFlows.from(Http.inboundGateway("/foo").requestMapping(m -> m.methods(HttpMethod.POST))
-				.requestPayloadType(Map.class)).channel(httpRequest2()).transform(new ObjectToJsonTransformer()).handle(fileWriter()).get();
+	public IntegrationFlow inbound2(ReplyEndpointOfInoubGateway replyEndpointOfInoubGateway) {
+		return IntegrationFlows.from(Http.inboundGateway("/httpandtransformer").requestMapping(m -> m.methods(HttpMethod.POST))
+				.requestPayloadType(Map.class).replyChannel("replyToInboundGateway")).handle(replyEndpointOfInoubGateway).channel(httpRequest2()).transform(new ObjectToJsonTransformer()).handle(fileWriter()).get();
 	}
 	
 //	@Bean
